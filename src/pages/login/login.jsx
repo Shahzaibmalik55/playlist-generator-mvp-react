@@ -44,7 +44,7 @@ export const Login = () => {
         <Button
           type="primary"
           shape="round"
-          icon={<SpotifyOutlined size={30} />}
+          icon={<SpotifyOutlined style={{ fontSize: "1.1rem" }} />}
           loading={isLoading}
           onClick={() => onLogin()}
         >

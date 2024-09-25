@@ -16,7 +16,8 @@ export const LoginCallback = () => {
     const query = new URLSearchParams(search);
     const code = query.get("code");
     const state = query.get("state");
-    if (!code && !state) {
+    const hasError = query.get("error");
+    if (hasError || !code || !state) {
       navigate("/login");
       return () => {};
     }

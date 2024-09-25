@@ -1,9 +1,25 @@
 import { useState } from "react";
-import { Button, Card, Col, Image, Row, Select, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Image,
+  Input,
+  Modal,
+  Row,
+  Select,
+  Typography,
+} from "antd";
 import { generatePlaylist } from "../../apis/playlist-generator";
+import {
+  LinkOutlined,
+  PlayCircleFilled,
+  SpotifyFilled,
+} from "@ant-design/icons";
+import { savePlaylist } from "../../apis/save-playlist";
+import { useAuth } from "../../hooks/useAuth";
 
 import "./mood-playlist-generator.scss";
-import { LinkOutlined, PlayCircleFilled } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -36,12 +52,17 @@ export const MoodPlaylistGenerator = () => {
 
   const [spotifyTracks, setSpotifyTracks] = useState([]);
 
+  const { user } = useAuth();
+
+  const [isModalOpen, setIsModalOpen] = useState();
+
+  const [playlistName, setPlaylistName] = useState("");
+
   const onGenerate = async () => {
     try {
       setSpotifyTracks([]);
       setIsFetching(true);
       const data = await generatePlaylist(selectOption);
-      console.log("data", data);
       setSpotifyTracks(data.tracks);
     } catch (err) {
       console.log("err", err);
@@ -52,6 +73,32 @@ export const MoodPlaylistGenerator = () => {
 
   const openLink = (link) => {
     window.open(link, "_blank");
+  };
+
+  const onSave = () => {
+    setIsModalOpen(true);
+  };
+
+  const onSavePlaylist = async () => {
+    try {
+      setIsModalOpen(false);
+      setIsFetching(true);
+      const ids = spotifyTracks.map((track) => track.uri);
+      const payload = {
+        ids,
+        userId: user.id,
+        playlist: {
+          name: playlistName,
+          description: `Playlist-table saved playlist for ${selectOption} mood on time ${new Date().toUTCString()}`,
+        },
+      };
+      await savePlaylist(payload);
+      setPlaylistName("");
+    } catch (err) {
+      console.log("err", err);
+    } finally {
+      setIsFetching(false);
+    }
   };
 
   return (
@@ -96,6 +143,23 @@ export const MoodPlaylistGenerator = () => {
             </Button>
           </Col>
         </Row>
+
+        {!!spotifyTracks.length && (
+          <Row justify={"end"} style={{ margin: "12px 0px" }}>
+            <Col xxl={5} xl={5} lg={6} md={8} sm={24} xs={24}>
+              <Button
+                size="large"
+                type="primary"
+                icon={<SpotifyFilled />}
+                style={{ width: "100%" }}
+                onClick={onSave}
+                loading={isFetching}
+              >
+                Save Playlist to Spotify
+              </Button>
+            </Col>
+          </Row>
+        )}
 
         <Row gutter={[20, 20]} className="list">
           {spotifyTracks.map((track) => {
@@ -150,6 +214,36 @@ export const MoodPlaylistGenerator = () => {
           })}
         </Row>
       </Col>
+
+      <Modal
+        title="Please enter Playlist name"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={[
+          <Button
+            color="default"
+            onClick={() => setIsModalOpen(false)}
+            key={"cancel"}
+          >
+            Cancel
+          </Button>,
+          <Button
+            type="primary"
+            color="primary"
+            onClick={onSavePlaylist}
+            key={"save"}
+            disabled={!playlistName || playlistName?.length < 3}
+          >
+            Save
+          </Button>,
+        ]}
+      >
+        <Input
+          value={playlistName}
+          onChange={({ target }) => setPlaylistName(target.value)}
+          size="large"
+        />
+      </Modal>
     </Row>
   );
 };

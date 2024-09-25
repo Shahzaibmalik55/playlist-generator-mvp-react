@@ -1,4 +1,5 @@
-import { Button, Col, Row } from "antd";
+import { useState } from "react";
+import { Button, Col, Popover, Row } from "antd";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -6,6 +7,12 @@ import "./app-header.scss";
 
 export const AppHeader = () => {
   const { logout, user } = useAuth();
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpenChange = (newOpen) => {
+    setOpen(newOpen);
+  };
 
   return (
     <Row className="header">
@@ -19,9 +26,20 @@ export const AppHeader = () => {
 
           {!!user && (
             <Col span={"auto"}>
-              <Button danger onClick={() => logout()}>
-                Logout
-              </Button>
+              <Popover
+                content={
+                  <Button onClick={logout} color="danger" variant="text">
+                    Logout
+                  </Button>
+                }
+                trigger="click"
+                open={open}
+                onOpenChange={handleOpenChange}
+              >
+                <Button color="primary" variant="outlined" size="large">
+                  {user.display_name}
+                </Button>
+              </Popover>
             </Col>
           )}
         </Row>

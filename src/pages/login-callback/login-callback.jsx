@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { LoadingOutlined } from "@ant-design/icons";
 import { loginUser } from "../../apis/login";
+import { useNotification } from "../../hooks/notification";
 
 const { Title } = Typography;
 
@@ -12,18 +13,27 @@ export const LoginCallback = () => {
   const { search } = useLocation();
   const { login } = useAuth();
 
+  const { api } = useNotification();
+
   useEffect(() => {
     const query = new URLSearchParams(search);
     const code = query.get("code");
     const state = query.get("state");
     const hasError = query.get("error");
     if (hasError || !code || !state) {
-      navigate("/login");
-      return () => {};
+      throw new Error("");
     }
     async function loginFromCode(params) {
-      const data = await loginUser(params);
-      login(data);
+      try {
+        const data = await loginUser(params);
+        login(data);
+      } catch (err) {
+        navigate("/login");
+        api.error({
+          message: err.message || "Login failed, please try again",
+          placement: "top",
+        });
+      }
     }
     loginFromCode({
       code,

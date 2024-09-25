@@ -20,10 +20,13 @@ import { savePlaylist } from "../../apis/save-playlist";
 import { useAuth } from "../../hooks/useAuth";
 
 import "./mood-playlist-generator.scss";
+import { useNotification } from "../../hooks/notification";
 
 const { Title } = Typography;
 
 export const MoodPlaylistGenerator = () => {
+  const { api } = useNotification();
+
   const options = [
     {
       label: "Gym",
@@ -46,6 +49,7 @@ export const MoodPlaylistGenerator = () => {
       value: "romantic",
     },
   ];
+
   const [selectOption, setSelectedOption] = useState("");
 
   const [isFetching, setIsFetching] = useState(false);
@@ -65,7 +69,10 @@ export const MoodPlaylistGenerator = () => {
       const data = await generatePlaylist(selectOption);
       setSpotifyTracks(data.tracks);
     } catch (err) {
-      console.log("err", err);
+      api.error({
+        message: err.message,
+        placement: "top",
+      });
     } finally {
       setIsFetching(false);
     }
@@ -77,6 +84,11 @@ export const MoodPlaylistGenerator = () => {
 
   const onSave = () => {
     setIsModalOpen(true);
+  };
+
+  const onSelectOption = (option) => {
+    setSelectedOption(option);
+    setSpotifyTracks([]);
   };
 
   const onSavePlaylist = async () => {
@@ -93,9 +105,15 @@ export const MoodPlaylistGenerator = () => {
         },
       };
       await savePlaylist(payload);
+      api.success({
+        message: `Playlist ${playlistName} save to your Spotify account`,
+      });
       setPlaylistName("");
     } catch (err) {
-      console.log("err", err);
+      api.error({
+        message: err.message,
+        placement: "top",
+      });
     } finally {
       setIsFetching(false);
     }
@@ -112,7 +130,7 @@ export const MoodPlaylistGenerator = () => {
           </Col>
           <Col xxl={8} xl={8} lg={8} md={12} sm={24} xs={24}>
             <Select
-              onChange={(value) => setSelectedOption(value)}
+              onChange={onSelectOption}
               style={{ width: "100%" }}
               size="large"
               showSearch

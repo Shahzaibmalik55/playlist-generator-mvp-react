@@ -6,7 +6,9 @@ import "./App.scss";
 import { ProtectedRoute } from "./components/protected-route/protected-route";
 import { AppLayout } from "./components/app-layout/app-layout";
 
+// Hooks
 import { AuthProvider } from "./hooks/useAuth";
+import { NotificationProvider } from "./hooks/notification";
 
 // Pages
 import { MoodPlaylistGenerator } from "./pages/mood-playlist-generator/mood-playlist-generator";
@@ -21,22 +23,24 @@ function App() {
         token: { fontFamily: "Roboto, sans-serif", colorPrimary: "#1db954" },
       }}
     >
-      <AuthProvider>
-        <AppLayout>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MoodPlaylistGenerator />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/login" element={<Login />} />
-            <Route path="/callback" element={<LoginCallback />} />
-          </Routes>
-        </AppLayout>
-      </AuthProvider>
+      <NotificationProvider>
+        <AuthProvider>
+          <AppLayout>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <MoodPlaylistGenerator />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/login" element={<Login />} />
+              <Route path="/callback" element={<LoginCallback />} />
+            </Routes>
+          </AppLayout>
+        </AuthProvider>
+      </NotificationProvider>
     </ConfigProvider>
   );
 }

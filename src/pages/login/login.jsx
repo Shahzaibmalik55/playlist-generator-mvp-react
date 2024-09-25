@@ -3,6 +3,7 @@ import { Button, Col, Row, Typography, notification } from "antd";
 import { useEffect, useState } from "react";
 import { loginUser } from "../../apis/login";
 import { useAuth } from "../../hooks/useAuth";
+import { useNotification } from "../../hooks/notification";
 
 const { Title } = Typography;
 
@@ -11,7 +12,7 @@ export const Login = () => {
 
   const { login } = useAuth();
 
-  const [api, contextHolder] = notification.useNotification();
+  const { api } = useNotification();
 
   useEffect(() => {
     // if user is exists in local storage, login user to context
@@ -38,7 +39,6 @@ export const Login = () => {
 
   return (
     <Row justify={"center"}>
-      {contextHolder}
       <Col span={"auto"}>
         <Title style={{ textAlign: "center" }}>Login</Title>
         <Button

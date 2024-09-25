@@ -9,7 +9,7 @@ import { AppLayout } from "./components/app-layout/app-layout";
 import { AuthProvider } from "./hooks/useAuth";
 
 // Pages
-import { MoodGenerator } from "./pages/mood-generator/mood-generator";
+import { MoodPlaylistGenerator } from "./pages/mood-playlist-generator/mood-playlist-generator";
 import { Login } from "./pages/login/login";
 import { LoginCallback } from "./pages/login-callback/login-callback";
 
@@ -21,22 +21,22 @@ function App() {
         token: { fontFamily: "Roboto, sans-serif", colorPrimary: "#1db954" },
       }}
     >
-      <AppLayout>
-        <AuthProvider>
+      <AuthProvider>
+        <AppLayout>
           <Routes>
             <Route
               path="/"
               element={
                 <ProtectedRoute>
-                  <MoodGenerator />
+                  <MoodPlaylistGenerator />
                 </ProtectedRoute>
               }
             />
             <Route path="/login" element={<Login />} />
             <Route path="/callback" element={<LoginCallback />} />
           </Routes>
-        </AuthProvider>
-      </AppLayout>
+        </AppLayout>
+      </AuthProvider>
     </ConfigProvider>
   );
 }

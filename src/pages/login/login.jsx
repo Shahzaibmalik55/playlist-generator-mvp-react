@@ -37,10 +37,10 @@ export const Login = () => {
   };
 
   return (
-    <Row>
+    <Row justify={"center"}>
       {contextHolder}
-      <Col span={24}>
-        <Title>Login</Title>
+      <Col span={"auto"}>
+        <Title style={{ textAlign: "center" }}>Login</Title>
         <Button
           type="primary"
           shape="round"

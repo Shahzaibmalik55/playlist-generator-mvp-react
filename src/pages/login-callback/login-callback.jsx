@@ -31,8 +31,8 @@ export const LoginCallback = () => {
   }, []);
 
   return (
-    <Row>
-      <Col span={24}>
+    <Row justify={"center"}>
+      <Col span={"auto"} style={{ textAlign: "center" }}>
         <Title>Please wait .... where logging you in</Title>
         <Spin indicator={<LoadingOutlined spin />} size="large" />
       </Col>

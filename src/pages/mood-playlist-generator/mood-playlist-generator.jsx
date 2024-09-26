@@ -29,6 +29,10 @@ export const MoodPlaylistGenerator = () => {
 
   const options = [
     {
+      label: "Groovy night out with friends",
+      value: "groovy night out with friends",
+    },
+    {
       label: "Gym",
       value: "gym",
     },

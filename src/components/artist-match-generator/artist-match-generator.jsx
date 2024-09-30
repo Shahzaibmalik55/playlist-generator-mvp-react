@@ -73,7 +73,6 @@ export const ArtistMatchGenerator = () => {
       if (!text) {
         return;
       }
-      setIsSearching(true);
       const query = {
         q: text,
         limit: 10,
@@ -94,8 +93,6 @@ export const ArtistMatchGenerator = () => {
         message: err.message,
         placement: "top",
       });
-    } finally {
-      setIsSearching(false);
     }
   };
 

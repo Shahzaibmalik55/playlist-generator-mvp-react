@@ -46,6 +46,7 @@ export const Login = () => {
           shape="round"
           icon={<SpotifyOutlined style={{ fontSize: "1.1rem" }} />}
           loading={isLoading}
+          style={{ backgroundColor: "#1db954" }}
           onClick={() => onLogin()}
         >
           Login with Spotify

@@ -1,4 +1,4 @@
-import { ConfigProvider } from "antd";
+import { ConfigProvider, theme } from "antd";
 import { Route, Routes } from "react-router";
 import "./App.scss";
 
@@ -11,7 +11,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { NotificationProvider } from "./hooks/notification";
 
 // Pages
-import { MoodPlaylistGenerator } from "./pages/mood-playlist-generator/mood-playlist-generator";
+import { Home } from "./pages/home/home";
 import { Login } from "./pages/login/login";
 import { LoginCallback } from "./pages/login-callback/login-callback";
 
@@ -20,7 +20,12 @@ function App() {
     <ConfigProvider
       theme={{
         hashed: false,
-        token: { fontFamily: "Roboto, sans-serif", colorPrimary: "#1db954" },
+        token: {
+          fontFamily: "Roboto, sans-serif",
+          colorPrimary: "#6565ce",
+          colorBgBase: "0c0c0f",
+        },
+        algorithm: theme.darkAlgorithm,
       }}
     >
       <NotificationProvider>
@@ -31,7 +36,7 @@ function App() {
                 path="/"
                 element={
                   <ProtectedRoute>
-                    <MoodPlaylistGenerator />
+                    <Home />
                   </ProtectedRoute>
                 }
               />

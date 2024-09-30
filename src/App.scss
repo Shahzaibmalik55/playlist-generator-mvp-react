@@ -1,0 +1,16 @@
+.theme-btn:not(:disabled) {
+  background: linear-gradient(
+    90deg,
+    #6565ce,
+    #6f5bd0,
+    #c05bd0,
+    #6565ce
+  ) !important;
+  &:hover {
+    color: #ffffffbd !important;
+  }
+}
+
+.full-width {
+  width: 100%;
+}

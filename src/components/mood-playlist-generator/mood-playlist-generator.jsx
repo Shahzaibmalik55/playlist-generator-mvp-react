@@ -152,30 +152,31 @@ export const MoodPlaylistGenerator = () => {
         </Row>
 
         <Row justify={"center"}>
-          <Col xxl={4} xl={4} lg={4} md={8} sm={24} xs={24}>
+          <Col xxl={6} xl={6} lg={6} md={12} sm={24} xs={24}>
             <Button
-              style={{ marginTop: 16, width: "100%" }}
+              style={{ marginTop: 16 }}
               size="large"
-              color="primary full-width"
+              className="theme-btn full-width"
               disabled={!selectOption}
               loading={isFetching}
               onClick={onGenerate}
             >
-              {isFetching ? "Generating..." : "Generate"}
+              {isFetching ? "Generating..." : "Generate a new playlist"}
             </Button>
           </Col>
         </Row>
 
         {!!spotifyTracks.length && (
-          <Row justify={"end"} style={{ margin: "12px 0px" }}>
+          <Row justify={"end"} style={{ margin: "20px 0px" }}>
             <Col xxl={5} xl={5} lg={6} md={8} sm={24} xs={24}>
               <Button
                 size="large"
-                type="primary"
+                className="full-width"
                 icon={<SpotifyFilled />}
-                style={{ width: "100%" }}
                 onClick={onSave}
                 loading={isFetching}
+                style={{ backgroundColor: "#1db954" }}
+                type="primary"
               >
                 Save Playlist to Spotify
               </Button>

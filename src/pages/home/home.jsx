@@ -4,6 +4,8 @@ import "./home.scss";
 
 // Components
 import { MoodPlaylistGenerator } from "../../components/mood-playlist-generator/mood-playlist-generator";
+import { SongMatchGenerator } from "../../components/song-match-generator/song-match-generator";
+import { ArtistMatchGenerator } from "../../components/artist-match-generator/artist-match-generator";
 
 export const Home = () => {
   const tabModes = [
@@ -15,10 +17,12 @@ export const Home = () => {
     {
       label: "Song Match",
       value: "song-match",
+      component: <SongMatchGenerator />,
     },
     {
       label: "Artist Match",
       value: "artist-match",
+      component: <ArtistMatchGenerator />,
     },
   ];
 

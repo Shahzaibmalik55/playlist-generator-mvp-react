@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
+  AutoComplete,
   Button,
   Card,
   Col,
@@ -7,7 +8,6 @@ import {
   Input,
   Modal,
   Row,
-  Select,
   Typography,
 } from "antd";
 import { generatePlaylist } from "../../apis/playlist-generator";
@@ -18,43 +18,17 @@ import {
 } from "@ant-design/icons";
 import { savePlaylist } from "../../apis/save-playlist";
 import { useAuth } from "../../hooks/useAuth";
-
-import "./mood-playlist-generator.scss";
 import { useNotification } from "../../hooks/notification";
+import { spotifySearch } from "../../apis/spotify-search";
+import debounce from "lodash/debounce";
+
+import "./artist-match-generator.scss";
+import { getArtists } from "../../apis/get-artists";
 
 const { Title } = Typography;
 
-export const MoodPlaylistGenerator = () => {
+export const ArtistMatchGenerator = () => {
   const { api } = useNotification();
-
-  const options = [
-    {
-      label: "Groovy night out with friends",
-      value: "groovy night out with friends",
-    },
-    {
-      label: "Gym",
-      value: "gym",
-    },
-    {
-      label: "Party",
-      value: "party",
-    },
-    {
-      label: "Relax",
-      value: "relax",
-    },
-    {
-      label: "Travel",
-      value: "travel",
-    },
-    {
-      label: "Romantic",
-      value: "romantic",
-    },
-  ];
-
-  const [selectOption, setSelectedOption] = useState("");
 
   const [isFetching, setIsFetching] = useState(false);
 
@@ -62,25 +36,73 @@ export const MoodPlaylistGenerator = () => {
 
   const { user } = useAuth();
 
+  const [selectedOption, setSelectedOption] = useState("");
+
+  const [searchText, setSearchText] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState();
 
   const [playlistName, setPlaylistName] = useState("");
 
-  const onGenerate = async () => {
+  const [artists, setArtists] = useState([]);
+
+  const getArtist = async () => {
     try {
-      setSpotifyTracks([]);
       setIsFetching(true);
-      const data = await generatePlaylist({ mood: selectOption });
-      setSpotifyTracks(data.tracks);
+      const data = await getArtists();
+      const artistsOptions = data.items.map((artist) => ({
+        label: artist.name,
+        value: artist.id,
+        image: artist.images[0]?.url,
+        id: artist.id,
+      }));
+      setArtists(artistsOptions);
+    } catch (err) {
+      console.log("err", err);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    getArtist();
+  }, []);
+
+  const searchArtist = async (text) => {
+    try {
+      if (!text) {
+        return;
+      }
+      setIsSearching(true);
+      const query = {
+        q: text,
+        limit: 10,
+        type: "artist",
+      };
+      const data = await spotifySearch(query);
+      const artistsOptions = data.artists.items.map((artist) => {
+        return {
+          label: artist.name,
+          value: artist.id,
+          image: artist.images[0]?.url,
+          id: artist.id,
+        };
+      });
+      setArtists([...artistsOptions]);
     } catch (err) {
       api.error({
         message: err.message,
         placement: "top",
       });
     } finally {
-      setIsFetching(false);
+      setIsSearching(false);
     }
   };
+
+  const delayedSearch = useCallback(
+    debounce((text) => searchArtist(text), 1000),
+    []
+  );
 
   const openLink = (link) => {
     window.open(link, "_blank");
@@ -88,11 +110,6 @@ export const MoodPlaylistGenerator = () => {
 
   const onSave = () => {
     setIsModalOpen(true);
-  };
-
-  const onSelectOption = (option) => {
-    setSelectedOption(option);
-    setSpotifyTracks([]);
   };
 
   const onSavePlaylist = async () => {
@@ -105,7 +122,6 @@ export const MoodPlaylistGenerator = () => {
         userId: user.id,
         playlist: {
           name: playlistName,
-          description: `Playlist-table saved playlist for ${selectOption} mood on time ${new Date().toUTCString()}`,
         },
       };
       await savePlaylist(payload);
@@ -123,31 +139,50 @@ export const MoodPlaylistGenerator = () => {
     }
   };
 
+  const onSelectOption = (value) => {
+    setSelectedOption(value);
+    const name = artists.find((artist) => artist.value === value)?.label;
+    setSearchText(name || "");
+    setSpotifyTracks([]);
+  };
+
+  const onGenerate = async () => {
+    try {
+      setSpotifyTracks([]);
+      setIsFetching(true);
+      const data = await generatePlaylist({ artist: selectedOption });
+      setSpotifyTracks(data.tracks);
+    } catch (err) {
+      api.error({
+        message: err.message,
+        placement: "top",
+      });
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
   return (
     <Row justify={"center"}>
       <Col xxl={20} xl={20} lg={20} md={20} sm={22} xs={22}>
         <Row align={"middle"} justify={"center"}>
           <Col span={24}>
-            <Title style={{ textAlign: "center" }}>
-              Mood Playlist Generator
-            </Title>
+            <Title style={{ textAlign: "center" }}>Artist Match</Title>
           </Col>
           <Col xxl={8} xl={8} lg={8} md={12} sm={24} xs={24}>
-            <Select
-              onChange={onSelectOption}
+            <AutoComplete
+              onSearch={(text) => {
+                setSearchText();
+                delayedSearch(text);
+              }}
+              onSelect={onSelectOption}
               style={{ width: "100%" }}
               size="large"
-              showSearch
-              placeholder="Select the mood/occasion"
+              placeholder="Search for the artist"
               disabled={isFetching}
-              loading={isFetching}
-            >
-              {options.map((option) => (
-                <Select.Option value={option.value} key={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
+              options={artists}
+              value={searchText}
+            />
           </Col>
         </Row>
 
@@ -157,7 +192,7 @@ export const MoodPlaylistGenerator = () => {
               style={{ marginTop: 16 }}
               size="large"
               className="theme-btn full-width"
-              disabled={!selectOption}
+              disabled={!selectedOption}
               loading={isFetching}
               onClick={onGenerate}
             >

@@ -1,16 +1,5 @@
-import { useState } from "react";
-import {
-  Button,
-  Card,
-  Col,
-  Image,
-  Input,
-  Modal,
-  Row,
-  Select,
-  Typography,
-} from "antd";
-import { generatePlaylist } from "../../apis/playlist-generator";
+import { useCallback, useState } from "react";
+import { Button, Card, Col, Image, Input, Modal, Row, Typography } from "antd";
 import {
   LinkOutlined,
   PlayCircleFilled,
@@ -18,45 +7,19 @@ import {
 } from "@ant-design/icons";
 import { savePlaylist } from "../../apis/save-playlist";
 import { useAuth } from "../../hooks/useAuth";
-
-import "./mood-playlist-generator.scss";
+import "./song-match-generator.scss";
 import { useNotification } from "../../hooks/notification";
+import { spotifySearch } from "../../apis/spotify-search";
+import debounce from "lodash/debounce";
 
 const { Title } = Typography;
 
-export const MoodPlaylistGenerator = () => {
+export const SongMatchGenerator = () => {
   const { api } = useNotification();
 
-  const options = [
-    {
-      label: "Groovy night out with friends",
-      value: "groovy night out with friends",
-    },
-    {
-      label: "Gym",
-      value: "gym",
-    },
-    {
-      label: "Party",
-      value: "party",
-    },
-    {
-      label: "Relax",
-      value: "relax",
-    },
-    {
-      label: "Travel",
-      value: "travel",
-    },
-    {
-      label: "Romantic",
-      value: "romantic",
-    },
-  ];
-
-  const [selectOption, setSelectedOption] = useState("");
-
   const [isFetching, setIsFetching] = useState(false);
+
+  const [isSearching, setIsSearching] = useState(false);
 
   const [spotifyTracks, setSpotifyTracks] = useState([]);
 
@@ -66,21 +29,32 @@ export const MoodPlaylistGenerator = () => {
 
   const [playlistName, setPlaylistName] = useState("");
 
-  const onGenerate = async () => {
+  const searchArtist = async (text) => {
     try {
-      setSpotifyTracks([]);
-      setIsFetching(true);
-      const data = await generatePlaylist({ mood: selectOption });
-      setSpotifyTracks(data.tracks);
+      if (!text) {
+        return;
+      }
+      setIsSearching(true);
+      const query = {
+        q: text,
+        type: "track",
+      };
+      const data = await spotifySearch(query);
+      setSpotifyTracks(data.tracks.items);
     } catch (err) {
       api.error({
         message: err.message,
         placement: "top",
       });
     } finally {
-      setIsFetching(false);
+      setIsSearching(false);
     }
   };
+
+  const delayedSearch = useCallback(
+    debounce((text) => searchArtist(text), 1000),
+    []
+  );
 
   const openLink = (link) => {
     window.open(link, "_blank");
@@ -88,11 +62,6 @@ export const MoodPlaylistGenerator = () => {
 
   const onSave = () => {
     setIsModalOpen(true);
-  };
-
-  const onSelectOption = (option) => {
-    setSelectedOption(option);
-    setSpotifyTracks([]);
   };
 
   const onSavePlaylist = async () => {
@@ -105,7 +74,6 @@ export const MoodPlaylistGenerator = () => {
         userId: user.id,
         playlist: {
           name: playlistName,
-          description: `Playlist-table saved playlist for ${selectOption} mood on time ${new Date().toUTCString()}`,
         },
       };
       await savePlaylist(payload);
@@ -128,41 +96,16 @@ export const MoodPlaylistGenerator = () => {
       <Col xxl={20} xl={20} lg={20} md={20} sm={22} xs={22}>
         <Row align={"middle"} justify={"center"}>
           <Col span={24}>
-            <Title style={{ textAlign: "center" }}>
-              Mood Playlist Generator
-            </Title>
+            <Title style={{ textAlign: "center" }}>Song Search</Title>
           </Col>
           <Col xxl={8} xl={8} lg={8} md={12} sm={24} xs={24}>
-            <Select
-              onChange={onSelectOption}
+            <Input
+              onChange={({ target }) => delayedSearch(target.value)}
               style={{ width: "100%" }}
               size="large"
-              showSearch
-              placeholder="Select the mood/occasion"
+              placeholder="Search for tracks/songs"
               disabled={isFetching}
-              loading={isFetching}
-            >
-              {options.map((option) => (
-                <Select.Option value={option.value} key={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col>
-        </Row>
-
-        <Row justify={"center"}>
-          <Col xxl={6} xl={6} lg={6} md={12} sm={24} xs={24}>
-            <Button
-              style={{ marginTop: 16 }}
-              size="large"
-              className="theme-btn full-width"
-              disabled={!selectOption}
-              loading={isFetching}
-              onClick={onGenerate}
-            >
-              {isFetching ? "Generating..." : "Generate a new playlist"}
-            </Button>
+            />
           </Col>
         </Row>
 

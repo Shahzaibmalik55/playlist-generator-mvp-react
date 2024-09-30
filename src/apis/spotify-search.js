@@ -1,8 +1,8 @@
 import { axiosInstance } from "./index";
 
-export const generatePlaylist = async (payload) => {
+export const spotifySearch = async (params) => {
   try {
-    const res = await axiosInstance.post("/playlist/generate", payload);
+    const res = await axiosInstance.get("/spotify-search", { params });
     return Promise.resolve(res.data.data);
   } catch (err) {
     console.log(err);

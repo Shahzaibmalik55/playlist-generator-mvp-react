@@ -1,7 +1,9 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Button, Card, Col, Image, Input, Modal, Row, Typography } from "antd";
 import {
+  FileOutlined,
   LinkOutlined,
+  LoadingOutlined,
   PlayCircleFilled,
   SpotifyFilled,
 } from "@ant-design/icons";
@@ -10,9 +12,10 @@ import { useAuth } from "../../hooks/useAuth";
 import "./song-match-generator.scss";
 import { useNotification } from "../../hooks/notification";
 import { spotifySearch } from "../../apis/spotify-search";
-import debounce from "lodash/debounce";
 
 const { Title } = Typography;
+
+const { Search } = Input;
 
 export const SongMatchGenerator = () => {
   const { api } = useNotification();
@@ -27,13 +30,17 @@ export const SongMatchGenerator = () => {
 
   const [isModalOpen, setIsModalOpen] = useState();
 
+  const [searchedText, setSearchedText] = useState("");
+
   const [playlistName, setPlaylistName] = useState("");
 
   const searchArtist = async (text) => {
     try {
+      setSearchedText(text);
       if (!text) {
         return;
       }
+      setSpotifyTracks([]);
       setIsSearching(true);
       const query = {
         q: text,
@@ -50,11 +57,6 @@ export const SongMatchGenerator = () => {
       setIsSearching(false);
     }
   };
-
-  const delayedSearch = useCallback(
-    debounce((text) => searchArtist(text), 1000),
-    []
-  );
 
   const openLink = (link) => {
     window.open(link, "_blank");
@@ -99,12 +101,13 @@ export const SongMatchGenerator = () => {
             <Title style={{ textAlign: "center" }}>Song Search</Title>
           </Col>
           <Col xxl={8} xl={8} lg={8} md={12} sm={24} xs={24}>
-            <Input
-              onChange={({ target }) => delayedSearch(target.value)}
+            <Search
+              onSearch={(text) => searchArtist(text)}
               style={{ width: "100%" }}
               size="large"
               placeholder="Search for tracks/songs"
               disabled={isFetching}
+              loading={isSearching}
             />
           </Col>
         </Row>
@@ -127,7 +130,24 @@ export const SongMatchGenerator = () => {
           </Row>
         )}
 
-        <Row gutter={[20, 20]} className="list">
+        <Row gutter={[20, 20]} className="list" justify={"center"}>
+          {!isSearching && !!searchedText && !spotifyTracks.length && (
+            <Col span={"auto"} style={{ marginTop: 80, textAlign: "center" }}>
+              <FileOutlined style={{ fontSize: "4rem" }} />
+              <div style={{ marginTop: 12, fontSize: 24 }}>
+                No Results Found
+              </div>
+            </Col>
+          )}
+          {isSearching && (
+            <Col span={"auto"} style={{ marginTop: 80, textAlign: "center" }}>
+              <LoadingOutlined
+                style={{ fontSize: "3rem" }}
+                color="primary"
+                type="primary"
+              />
+            </Col>
+          )}
           {spotifyTracks.map((track) => {
             const actions = [];
             if (track?.preview_url) {

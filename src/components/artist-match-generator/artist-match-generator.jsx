@@ -13,6 +13,7 @@ import {
 import { generatePlaylist } from "../../apis/playlist-generator";
 import {
   LinkOutlined,
+  LoadingOutlined,
   PlayCircleFilled,
   SpotifyFilled,
 } from "@ant-design/icons";
@@ -216,7 +217,16 @@ export const ArtistMatchGenerator = () => {
           </Row>
         )}
 
-        <Row gutter={[20, 20]} className="list">
+        <Row gutter={[20, 20]} justify={"center"} className="list">
+          {isFetching && (
+            <Col span={"auto"} style={{ marginTop: 80, textAlign: "center" }}>
+              <LoadingOutlined
+                style={{ fontSize: "3rem" }}
+                color="primary"
+                type="primary"
+              />
+            </Col>
+          )}
           {spotifyTracks.map((track) => {
             const actions = [];
             if (track?.preview_url) {

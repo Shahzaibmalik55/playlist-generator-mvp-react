@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  AutoComplete,
   Button,
   Card,
   Col,
@@ -35,23 +36,23 @@ export const MoodPlaylistGenerator = () => {
     },
     {
       label: "Gym",
-      value: "gym",
+      value: "Gym",
     },
     {
       label: "Party",
-      value: "party",
+      value: "Party",
     },
     {
       label: "Relax",
-      value: "relax",
+      value: "Relax",
     },
     {
       label: "Travel",
-      value: "travel",
+      value: "Travel",
     },
     {
       label: "Romantic",
-      value: "romantic",
+      value: "Romantic",
     },
   ];
 
@@ -134,7 +135,7 @@ export const MoodPlaylistGenerator = () => {
             </Title>
           </Col>
           <Col xxl={8} xl={8} lg={8} md={12} sm={24} xs={24}>
-            <Select
+            <AutoComplete
               onChange={onSelectOption}
               style={{ width: "100%" }}
               size="large"
@@ -142,13 +143,8 @@ export const MoodPlaylistGenerator = () => {
               placeholder="Select the mood/occasion"
               disabled={isFetching}
               loading={isFetching}
-            >
-              {options.map((option) => (
-                <Select.Option value={option.value} key={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
+              options={options}
+            ></AutoComplete>
           </Col>
         </Row>
 

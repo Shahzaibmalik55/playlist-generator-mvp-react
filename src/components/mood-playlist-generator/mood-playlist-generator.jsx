@@ -73,7 +73,7 @@ export const MoodPlaylistGenerator = () => {
       setSpotifyTracks([]);
       setIsFetching(true);
       const data = await generatePlaylist({ mood: selectOption });
-      setSpotifyTracks(data.tracks);
+      setSpotifyTracks(data.tracks.items);
     } catch (err) {
       api.error({
         message: err.message,
@@ -225,6 +225,10 @@ export const MoodPlaylistGenerator = () => {
                 >
                   <Row>
                     <Col span={24}>
+                      <Col span={24}>
+                        <b>Release date: </b>
+                        {track.album.release_date}
+                      </Col>
                       <b>Album: </b>
                       {track.album.name}
                     </Col>
